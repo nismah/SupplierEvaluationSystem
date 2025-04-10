@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 # Load data
 st.set_page_config(page_title="Supplier Evaluation System", layout="wide")
-df = pd.read_csv("updated_dummy_supplier_data.csv")
+df = pd.read_csv("SupplierEvaluationSystem/updated_dummy_supplier_data.csv")
 
 # Define evaluation criteria
 criteria = ['Price', 'Delivery', 'Quality', 'Service', 'Flexibility']
