@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 # Load data
 st.set_page_config(page_title="Supplier Evaluation System", layout="wide")
-df = pd.read_csv("SupplierEvaluationSystem/updated_dummy_supplier_data.csv")
+df = pd.read_csv("updated_dummy_supplier_data.csv")
 
 # Define evaluation criteria
 criteria = ['Price', 'Delivery', 'Quality', 'Service', 'Flexibility']
@@ -22,6 +22,9 @@ if 'Score' not in df.columns:
         df['Service'] * weights['Service'] +
         df['Flexibility'] * weights['Flexibility']
     )
+    # Shift score to make all values positive
+    min_score = df['Score'].min()
+    df['Score'] += abs(min_score)
 
 # Normalize data
 scaler = MinMaxScaler()
@@ -54,6 +57,9 @@ if st.button("🔄 Recalculate Rankings"):
         'Flexibility': flexibility_weight
     }
     ranked_df['WeightedScore'] = sum(ranked_df[c] * w for c, w in weight_dict.items())
+    # Shift scores to positive range
+    min_score = ranked_df['WeightedScore'].min()
+    ranked_df['WeightedScore'] += abs(min_score)
     ranked_df = ranked_df.sort_values(by='WeightedScore', ascending=False).reset_index(drop=True)
     st.dataframe(ranked_df[['Supplier', 'WeightedScore'] + criteria], use_container_width=True)
 
