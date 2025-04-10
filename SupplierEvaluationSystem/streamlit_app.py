@@ -1,51 +1,57 @@
-# streamlit_app.py
 import streamlit as st
 import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_squared_error
 
-# Load data from predefined file
-df = pd.read_csv("SupplierEvaluationSystem/updated_dummy_supplier_data.csv")
+# Load data
+df = pd.read_csv("updated_dummy_supplier_data.csv")
 
-# Page config and title
-st.set_page_config(page_title="Supplier Evaluation Portal", layout="centered")
-st.markdown("""
-    <style>
-        .main {background-color: #f5f7fa;}
-        h1 {color: #006d77;}
-        .css-1d391kg {background-color: #edf6f9 !important; border-radius: 10px; padding: 1rem;}
-    </style>
-""", unsafe_allow_html=True)
+# Normalize the data
+criteria = ['Price', 'Delivery', 'Quality', 'Service', 'Flexibility']
+scaler = MinMaxScaler()
+df[criteria] = scaler.fit_transform(df[criteria])
 
+# Feature columns
+X = df[criteria]  # Independent variables
+y = df['Score']  # Dependent variable (Score)
+
+# Train-test split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+# Initialize the Random Forest model
+rf_model = RandomForestRegressor(n_estimators=100, random_state=42)
+
+# Train the model
+rf_model.fit(X_train, y_train)
+
+# Predict on test data
+y_pred = rf_model.predict(X_test)
+
+# Evaluate the model
+mse = mean_squared_error(y_test, y_pred)
+st.write(f"Model Training Complete: Mean Squared Error: {mse:.4f}")
+
+# Streamlit UI
 st.title("🔍 AI-Driven Supplier Evaluation Portal")
-st.markdown("Adjust the weights below to prioritize what's most important to you:")
 
-# Sidebar sliders
-with st.sidebar:
-    st.header("⚙️ Set Evaluation Weights")
-    price_weight = st.slider('💰 Price (lower is better)', -1.0, 1.0, -0.3)
-    delivery_weight = st.slider('🚚 Delivery (lower is better)', -1.0, 1.0, -0.15)
-    quality_weight = st.slider('📦 Quality', -1.0, 1.0, 0.25)
-    service_weight = st.slider('🔧 Service', -1.0, 1.0, 0.2)
-    flexibility_weight = st.slider('🤹 Flexibility', -1.0, 1.0, 0.1)
-    go = st.button("🔄 Regenerate Results")
+# Sidebar for user input
+price_weight = st.slider('💰 Price', -1.0, 1.0, -0.3)
+delivery_weight = st.slider('🚚 Delivery', -1.0, 1.0, -0.15)
+quality_weight = st.slider('📦 Quality', -1.0, 1.0, 0.25)
+service_weight = st.slider('🔧 Service', -1.0, 1.0, 0.2)
+flexibility_weight = st.slider('🤹 Flexibility', -1.0, 1.0, 0.1)
 
-# Process when button is clicked
-if go:
-    criteria = ['Price', 'Delivery', 'Quality', 'Service', 'Flexibility']
-    weights = {
-        'Price': price_weight,
-        'Delivery': delivery_weight,
-        'Quality': quality_weight,
-        'Service': service_weight,
-        'Flexibility': flexibility_weight
-    }
+# Predict supplier score based on user input
+weights = [price_weight, delivery_weight, quality_weight, service_weight, flexibility_weight]
+user_input = pd.DataFrame([weights], columns=criteria)
 
-    norm_df = df.copy()
-    norm_df[criteria] = MinMaxScaler().fit_transform(df[criteria])
-    df['Score'] = sum(norm_df[c] * weights[c] for c in criteria)
-    df_sorted = df.sort_values('Score', ascending=False).reset_index(drop=True)
+# Normalize user input data
+user_input[criteria] = scaler.transform(user_input[criteria])
 
-    st.success("🎯 Ranked Suppliers Based on Current Weights")
-    st.dataframe(df_sorted[['Supplier', 'Score'] + criteria], use_container_width=True)
+# Predict score for user input
+predicted_score = rf_model.predict(user_input)
 
-    st.download_button("⬇️ Download Results as CSV", df_sorted.to_csv(index=False), "ranked_suppliers.csv")
+# Display the prediction
+st.write(f"Predicted Supplier Score: {predicted_score[0]:.2f}")
