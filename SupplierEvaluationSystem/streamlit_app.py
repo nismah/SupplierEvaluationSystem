@@ -4,7 +4,7 @@ import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
 
 # Load data from predefined file
-df = pd.read_csv("data/supplier_data.csv")
+df = pd.read_csv("updated_dummy_supplier_data.csv")
 
 # Page config and title
 st.set_page_config(page_title="Supplier Evaluation Portal", layout="centered")
