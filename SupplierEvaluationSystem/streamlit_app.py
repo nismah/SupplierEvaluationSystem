@@ -6,7 +6,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
 
 # Load data
-df = pd.read_csv("SupplierEvaluationSystem/SupplierEvaluationSystem/updated_dummy_supplier_data.csv")
+df = pd.read_csv("SupplierEvaluationSystem/updated_dummy_supplier_data.csv")
 
 # Normalize the data
 criteria = ['Price', 'Delivery', 'Quality', 'Service', 'Flexibility']
