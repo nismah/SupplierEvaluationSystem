@@ -8,6 +8,15 @@ from sklearn.metrics import mean_squared_error
 # Load data
 df = pd.read_csv("SupplierEvaluationSystem/updated_dummy_supplier_data.csv")
 
+# Check if 'Score' exists
+if 'Score' not in df.columns:
+    st.warning("Score column is missing, creating one using weighted criteria...")
+    df['Score'] = (df['Price'] * -0.3 + 
+                   df['Delivery'] * -0.15 + 
+                   df['Quality'] * 0.25 + 
+                   df['Service'] * 0.2 + 
+                   df['Flexibility'] * 0.1)
+
 # Normalize the data
 criteria = ['Price', 'Delivery', 'Quality', 'Service', 'Flexibility']
 scaler = MinMaxScaler()
